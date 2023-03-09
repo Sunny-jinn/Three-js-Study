@@ -4,8 +4,15 @@ import { Canvas } from "@react-three/fiber";
 import Box from "./Box";
 import styled from "styled-components";
 
-import { useGLTF, OrbitControls } from "@react-three/drei";
+import {
+  useGLTF,
+  OrbitControls,
+  Environment,
+  PerspectiveCamera,
+} from "@react-three/drei";
 import AnimatedSphere from "./AnimatedSphere";
+import { Track } from "./Track";
+import { Ground } from "./Ground";
 
 const Wrapper = styled.div`
   position: relative;
@@ -58,32 +65,46 @@ function Model(props) {
 
 function App() {
   return (
-    <Wrapper className="App">
-      <Canvas className="canvas">
-        <OrbitControls enableZoom={false} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[-2, 5, 2]} intensity={1} />
-        <Suspense fallback={null}>
-          <Box />
-        </Suspense>
-      </Canvas>
-      <Canvas className="canvas">
-        <OrbitControls enableZoom={false} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[-2, 5, 2]} intensity={1} />
-        <Suspense fallback={null}>
-          <AnimatedSphere />
-        </Suspense>
-      </Canvas>
-      <Canvas className="canvas">
-        <OrbitControls enableZoom={false} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[-2, 5, 2]} intensity={1} />
-        <Suspense fallback={null}>
-          <Model />
-        </Suspense>
-      </Canvas>
-    </Wrapper>
+    // <Wrapper className="App">
+    //   <Canvas className="canvas">
+    //     <OrbitControls enableZoom={false} />
+    //     <ambientLight intensity={0.5} />
+    //     <directionalLight position={[-2, 5, 2]} intensity={1} />
+    //     <Suspense fallback={null}>
+    //       <Box />
+    //     </Suspense>
+    //   </Canvas>
+    //   <Canvas className="canvas">
+    //     <OrbitControls enableZoom={false} />
+    //     <ambientLight intensity={0.5} />
+    //     <directionalLight position={[-2, 5, 2]} intensity={1} />
+    //     <Suspense fallback={null}>
+    //       <AnimatedSphere />
+    //     </Suspense>
+    //   </Canvas>
+    //   <Canvas className="canvas">
+    //     <OrbitControls enableZoom={false} />
+    //     <ambientLight intensity={0.5} />
+    //     <directionalLight position={[-2, 5, 2]} intensity={1} />
+    //     <Suspense fallback={null}>
+    //       <Model />
+    //     </Suspense>
+    //   </Canvas>
+    // </Wrapper>
+    <Canvas>
+      <Suspense fallback={null}>
+        <Environment
+          files={process.env.PUBLIC_URL + "/textures/envmap.hdr"}
+          background={"both"}
+        />
+
+        <PerspectiveCamera makeDefault position={[-6, 3.9, 6.21]} fov={40} />
+        <OrbitControls target={[-2.64, -0.71, 0.03]} />
+
+        <Track />
+        <Ground />
+      </Suspense>
+    </Canvas>
   );
 }
 
