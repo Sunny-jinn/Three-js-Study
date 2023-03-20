@@ -13,6 +13,7 @@ import {
 import AnimatedSphere from "./AnimatedSphere";
 import { Track } from "./Track";
 import { Ground } from "./Ground";
+import { Car } from "./Car";
 
 const Wrapper = styled.div`
   position: relative;
@@ -99,7 +100,7 @@ function App() {
 
       <PerspectiveCamera makeDefault position={[-6, 3.9, 6.21]} fov={40} />
       <OrbitControls target={[-2.64, -0.71, 0.03]} />
-
+      <Car />
       <Track />
       <Ground />
     </Suspense>
