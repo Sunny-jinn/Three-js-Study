@@ -53,6 +53,20 @@ export const useControls = (vehicleApi, chassisApi) => {
         vehicleApi.setSteeringValue(0, i);
       }
     }
+    if (controls.arraydown)
+      chassisApi.applyLocalImpulse([0, -5, 0], [0, 0, +1]);
+    if (controls.arrayup) chassisApi.applyLocalImpulse([0, -5, 0], [0, 0, -1]);
+    if (controls.arrayleft)
+      chassisApi.applyLocalImpulse([0, -5, 0], [-0.5, 0, 0]);
+    if (controls.arrayright)
+      chassisApi.applyLocalImpulse([0, -5, 0], [+0.5, 0, 0]);
+
+    if (controls.r) {
+      chassisApi.position.set(-1.5, 0.5, 3);
+      chassisApi.velocity.set(0, 0, 0);
+      chassisApi.angularVelocity.set(0, 0, 0);
+      chassisApi.rotation.set(0, 0, 0);
+    }
   }, [controls, vehicleApi, chassisApi]);
 
   return controls;
