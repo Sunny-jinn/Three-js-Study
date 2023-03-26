@@ -1,8 +1,9 @@
 import { useBox } from "@react-three/cannon";
 
-const debug = true;
+const debug = false;
 
 export function ColliderBox({ position, scale }) {
+  //This useBox hook makes collider box.
   useBox(() => ({
     args: scale,
     position,
@@ -11,9 +12,9 @@ export function ColliderBox({ position, scale }) {
 
   return (
     debug && (
-      <mesh position={position}>
+      <mesh>
         <boxGeometry args={scale} />
-        <meshBasicMaterial transparent={true} opacity={0.5} />
+        <meshBasicMaterial transparent={true} opacity={0} />
       </mesh>
     )
   );
