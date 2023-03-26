@@ -48,10 +48,17 @@ export function Car() {
 
   return (
     <group ref={vehicle} name="vehicle">
-      <mesh ref={chassisBody}>
+      <group ref={chassisBody} name="chassisBody">
+        <primitive
+          object={mesh}
+          rotation-y={Math.PI}
+          position={[0, -0.09, 0]}
+        />
+      </group>
+      {/* <mesh ref={chassisBody}>
         <meshBasicMaterial transparent={true} opacity={0.3} />
         <boxGeometry args={chassisBodyArgs} />
-      </mesh>
+      </mesh> */}
 
       <WheelDebug wheelRef={wheels[0]} radius={wheelRadius} />
       <WheelDebug wheelRef={wheels[1]} radius={wheelRadius} />
