@@ -52,12 +52,12 @@ export function Car({ thirdPerson }) {
     quaternion.setFromRotationMatrix(chassisBody.current.matrixWorld);
 
     let wDir = new Vector3(0, 0, 1);
-    wDir.applyQuaternion(quaternion);
-    wDir.normalize();
+    // wDir.applyQuaternion(quaternion);
+    // wDir.normalize();
 
     let cameraPosition = position
       .clone()
-      .add(wDir.clone().multiplyScalar(1).add(new Vector3(0, 0.3, 0)));
+      .add(wDir.clone().multiplyScalar(1).add(new Vector3(-1, 3.9, 6.21)));
 
     wDir.add(new Vector3(0, 0.2, 0));
     state.camera.position.copy(cameraPosition);
@@ -66,7 +66,7 @@ export function Car({ thirdPerson }) {
 
   useEffect(() => {
     mesh.scale.set(0.0012, 0.0012, 0.0012);
-    mesh.children[0].position.set(-365, -18, -67);
+    mesh.children[0].position.set(-365, -18, -167);
   }, [mesh]);
 
   return (
