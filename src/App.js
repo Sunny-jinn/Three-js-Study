@@ -9,6 +9,7 @@ import {
 import { Track } from "./Track";
 import { Ground } from "./Ground";
 import { Car } from "./Car";
+import Person from "./Person";
 
 function App() {
   const [thirdPerson, setThirdPerson] = useState(false);
@@ -38,7 +39,8 @@ function App() {
       {!thirdPerson && <OrbitControls target={[-2.64, -0.71, 0.03]} />}
       <Track />
       <Ground />
-      <Car thirdPerson={thirdPerson} />
+      <Person position={cameraPosition} />
+      {/* <Car thirdPerson={thirdPerson} /> */}
     </Suspense>
   );
 }
