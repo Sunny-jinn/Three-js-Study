@@ -4,18 +4,14 @@ import "./index.css";
 import App from "./App";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/cannon";
-import Person from "./Person";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  // <Canvas>
-  //   <Physics broadphase="SAP" gravity={[0, -2.6, 0]}>
-  //     <App />
-  //   </Physics>
-  // </Canvas>
-  <>
-    <Person />
-  </>
+  <Canvas style={{ background: "#000000" }}>
+    {/* <Physics broadphase="SAP" gravity={[0, -2.6, 0]}> */}
+    <App />
+    {/* </Physics> */}
+  </Canvas>
 );
 
 // If you want to start measuring performance in your app, pass a function

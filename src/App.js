@@ -10,7 +10,8 @@ import { Track } from "./Track";
 import { Ground } from "./Ground";
 import { Car } from "./Car";
 import Person from "./Person";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useLoader } from "@react-three/fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 function App() {
   // const [thirdPerson, setThirdPerson] = useState(false);
@@ -29,25 +30,35 @@ function App() {
   //   return () => window.removeEventListener("keydown", keydownHandler);
   // }, [thirdPerson]);
 
+  let mesh = useLoader(
+    GLTFLoader,
+    process.env.PUBLIC_URL + "/models/character.glb"
+  ).scene;
+
   const box = useRef(null);
-  useFrame(
-    () =>
-      box.current &&
-      void ((box.current.rotation.x += 0.01), (box.current.rotation.y += 0.01))
-  );
 
   return (
     <Suspense fallback={null}>
       <mesh ref={box}>
-        <boxGeometry attach="geometry" args={[1, 1, 1]} />
+        {/* <boxGeometry attach="geometry" args={[1, 1, 1]} />
         <meshLambertMaterial
           attach={"material"}
           transparent={true}
           opacity={1}
-          color={0x000000}
+          color={0x244497}
+        /> */}
+        <primitive
+          object={mesh}
+          rotation-y={Math.PI}
+          position={[0, -0.09, 0]}
+        />
+        <PerspectiveCamera makeDefault position={[120, 120, -120]} fov={60} />
+        <directionalLight
+          color={0xffffff}
+          intensity={10}
+          position={[1, 2, -1]}
         />
         <OrbitControls />
-        {/* <PerspectiveCamera makeDefault position={cameraPosition} fov={40} /> */}
       </mesh>
       {/* <Environment
         files={process.env.PUBLIC_URL + "/textures/envmap.hdr"}

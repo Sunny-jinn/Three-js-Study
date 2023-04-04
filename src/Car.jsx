@@ -82,11 +82,11 @@ export function Car({ thirdPerson }) {
         <meshBasicMaterial transparent={true} opacity={0.3} />
         <boxGeometry args={chassisBodyArgs} />
       </mesh> */}
-
+      {/* 
       <WheelDebug wheelRef={wheels[0]} radius={wheelRadius} />
       <WheelDebug wheelRef={wheels[1]} radius={wheelRadius} />
       <WheelDebug wheelRef={wheels[2]} radius={wheelRadius} />
-      <WheelDebug wheelRef={wheels[3]} radius={wheelRadius} />
+      <WheelDebug wheelRef={wheels[3]} radius={wheelRadius} /> */}
     </group>
   );
 }
