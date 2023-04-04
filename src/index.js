@@ -4,10 +4,18 @@ import "./index.css";
 import App from "./App";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/cannon";
+import * as THREE from "three";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <Canvas style={{ background: "#000000" }}>
+  <Canvas
+    style={{ background: "#000000" }}
+    gl={{ antialias: true }}
+    onCreated={({ gl }) => {
+      gl.shadowMap.enabled = true;
+      gl.shadowMap.type = THREE.VSMShadowMap;
+    }}
+  >
     {/* <Physics broadphase="SAP" gravity={[0, -2.6, 0]}> */}
     <App />
     {/* </Physics> */}
