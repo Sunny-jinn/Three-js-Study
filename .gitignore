@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 
+/public/models/character.glb
+
 # testing
 /coverage
 
