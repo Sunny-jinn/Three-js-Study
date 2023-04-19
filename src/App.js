@@ -14,8 +14,10 @@ import * as THREE from "three";
 
 const useModelAnimations = (modelRef, gltf) => {
   const [mixer, setMixer] = useState(null);
-  const animationsMapRef = useRef(new Map());
+  const [controls, setControls] = useState({});
 
+  const animationsMapRef = useRef(new Map());
+  const [previousAnimationAction, setPreviousAnimationAction] = useState(null);
   const [currentAnimationAction, setCurrentAnimationAction] = useState(null);
   const [animationsMap, setAnimationsMap] = useState(new Map());
 
@@ -24,23 +26,81 @@ const useModelAnimations = (modelRef, gltf) => {
       const animationClips = gltf.animations;
       const mixerInstance = new THREE.AnimationMixer(modelRef.current);
 
-      animationClips.forEach((clip) => {
-        const name = clip.name;
-        console.log(name);
-        animationsMap.set(name, mixerInstance.clipAction(clip));
-      });
+      if (animationClips) {
+        animationClips.forEach((clip) => {
+          const name = clip.name;
+          console.log(name);
+          animationsMap.set(name, mixerInstance.clipAction(clip));
+        });
+      }
 
       setMixer(mixerInstance);
       setAnimationsMap(animationsMap);
-      setCurrentAnimationAction(animationsMap.get("Idle"));
+      setCurrentAnimationAction(animationsMap.get("Run"));
     }
   }, [modelRef, gltf, mixer]);
+
+  useEffect(() => {
+    const keyDownPressHandler = (e) => {
+      setControls((controls) => ({
+        ...controls,
+        [e.key.toLowerCase()]: true,
+      }));
+    };
+
+    const keyUpPressHandler = (e) => {
+      setControls((controls) => ({
+        ...controls,
+        [e.key.toLowerCase()]: false,
+      }));
+    };
+
+    window.addEventListener("keydown", keyDownPressHandler);
+    window.addEventListener("keyup", keyUpPressHandler);
+    return () => {
+      window.removeEventListener("keydown", keyDownPressHandler);
+      window.removeEventListener("keyup", keyUpPressHandler);
+    };
+  }, []);
+
+  useEffect(() => {
+    let newAnimationAction = currentAnimationAction;
+    if (controls.w || controls.a || controls.d || controls.s) {
+      if (controls.shift) {
+        newAnimationAction = animationsMap.get("Run");
+      } else {
+        newAnimationAction = animationsMap.get("Walk");
+      }
+    } else {
+      newAnimationAction = animationsMap.get("Idle");
+    }
+
+    if (
+      currentAnimationAction &&
+      newAnimationAction &&
+      currentAnimationAction !== newAnimationAction
+    ) {
+      currentAnimationAction.fadeOut(0.5);
+      newAnimationAction.reset().fadeIn(0.5).play();
+      setCurrentAnimationAction(newAnimationAction);
+    }
+  }, [controls, animationsMap, currentAnimationAction]);
 
   useEffect(() => {
     if (currentAnimationAction) {
       currentAnimationAction.play();
     }
   }, [currentAnimationAction]);
+
+  // useEffect(() => {
+  //   if (currentAnimationAction && previousAnimationAction) {
+  //     if (previousAnimationAction !== currentAnimationAction) {
+  //       previousAnimationAction.fadeOut(0.5);
+  //       currentAnimationAction.reset().fadeIn(0.5).play();
+  //       setPreviousAnimationAction(currentAnimationAction);
+  //     }
+  //   }
+  // }, [currentAnimationAction, previousAnimationAction]);
 
   return { mixer, animationsMap: animationsMapRef.current };
 };
@@ -60,7 +120,6 @@ function Character({ charRef }) {
     }
   }, [charRef]);
   useHelper(charRef, THREE.BoxHelper);
-  console.log("hi");
 
   const { mixer } = useModelAnimations(charRef, { animations });
 
@@ -92,6 +151,7 @@ function Ground() {
 
 function App() {
   const [gltf, setGltf] = useState({});
+
   const box = useRef(null);
   const charRef = useRef();
   const pointRef = useRef();
@@ -118,6 +178,13 @@ function App() {
       scene.add(shadowLightRef.current.target);
     }
   }, [shadowLightRef, scene]);
+
+  const { mixer, animationsMap } = useModelAnimations(charRef, gltf);
+  const [currentAnimationAction, setCurrentAnimationAction] = useState(null);
+  const [currentAnimation, setCurrentAnimation] = useState("Idle");
+  // keydown
+
+  const processAnimation = () => {};
 
   return (
     <Suspense fallback={null}>
