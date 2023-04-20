@@ -92,16 +92,6 @@ const useModelAnimations = (modelRef, gltf) => {
     }
   }, [currentAnimationAction]);
 
-  // useEffect(() => {
-  //   if (currentAnimationAction && previousAnimationAction) {
-  //     if (previousAnimationAction !== currentAnimationAction) {
-  //       previousAnimationAction.fadeOut(0.5);
-  //       currentAnimationAction.reset().fadeIn(0.5).play();
-  //       setPreviousAnimationAction(currentAnimationAction);
-  //     }
-  //   }
-  // }, [currentAnimationAction, previousAnimationAction]);
-
   return { mixer, animationsMap: animationsMapRef.current };
 };
 
@@ -157,17 +147,6 @@ function App() {
   const pointRef = useRef();
   const shadowLightRef = useRef();
   const { scene } = useThree();
-
-  // const { scene, animations } = useGLTF("/models/character.glb");
-
-  // const { mixer } = useModelAnimations(charRef, { animations });
-
-  // // Update the mixer on each frame
-  // useFrame((_, delta) => {
-  //   if (mixer) {
-  //     mixer.update(delta);
-  //   }
-  // });
 
   useHelper(pointRef, PointLightHelper, 10);
   useHelper(shadowLightRef, DirectionalLightHelper, 10);
