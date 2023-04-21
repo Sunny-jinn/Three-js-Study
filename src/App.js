@@ -145,6 +145,7 @@ function App() {
   const box = useRef(null);
   const charRef = useRef();
   const pointRef = useRef();
+  const cameraRef = useRef();
   const shadowLightRef = useRef();
   const { scene } = useThree();
 
@@ -157,6 +158,27 @@ function App() {
       scene.add(shadowLightRef.current.target);
     }
   }, [shadowLightRef, scene]);
+
+  useFrame(() => {
+    if (charRef.current && cameraRef.current) {
+      const angleCameraDirectionAxisY =
+        Math.atan2(
+          cameraRef.current.position.x - charRef.current.position.x,
+          cameraRef.current.position.z - charRef.current.position.z
+        ) + Math.PI;
+
+      const rotateQuaternion = new THREE.Quaternion();
+      rotateQuaternion.setFromAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        angleCameraDirectionAxisY
+      );
+
+      charRef.current.quaternion.rotateTowards(
+        rotateQuaternion,
+        THREE.MathUtils.degToRad(5)
+      );
+    }
+  });
 
   const { mixer, animationsMap } = useModelAnimations(charRef, gltf);
   const [currentAnimationAction, setCurrentAnimationAction] = useState(null);
@@ -180,6 +202,7 @@ function App() {
         <PerspectiveCamera
           makeDefault
           position={[0, 100, 500]}
+          ref={cameraRef}
           fov={60}
           near={1}
           far={5000}
