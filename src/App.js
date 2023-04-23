@@ -12,13 +12,19 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Box3, DirectionalLightHelper, PointLightHelper } from "three";
 import * as THREE from "three";
 
-const useModelAnimations = (modelRef, gltf) => {
+const useModelAnimations = (
+  modelRef,
+  gltf,
+  directionOffset,
+  setDirectionOffset
+) => {
   const [mixer, setMixer] = useState(null);
   const [controls, setControls] = useState({});
 
   const animationsMapRef = useRef(new Map());
   const [previousAnimationAction, setPreviousAnimationAction] = useState(null);
   const [currentAnimationAction, setCurrentAnimationAction] = useState(null);
+
   const [animationsMap, setAnimationsMap] = useState(new Map());
 
   useEffect(() => {
@@ -87,6 +93,28 @@ const useModelAnimations = (modelRef, gltf) => {
   }, [controls, animationsMap, currentAnimationAction]);
 
   useEffect(() => {
+    if (controls.w) {
+      if (controls.a) {
+        setDirectionOffset(Math.PI / 4);
+      } else if (controls.d) {
+        setDirectionOffset(-Math.PI / 4);
+      }
+    } else if (controls.s) {
+      if (controls.a) {
+        setDirectionOffset(Math.PI / 4 + Math.PI / 2);
+      } else if (controls.d) {
+        setDirectionOffset(-Math.PI / 4 - Math.PI / 2);
+      } else {
+        setDirectionOffset(Math.PI);
+      }
+    } else if (controls.a) {
+      setDirectionOffset(Math.PI / 2);
+    } else if (controls.d) {
+      setDirectionOffset(-Math.PI / 4);
+    }
+  }, [controls]);
+
+  useEffect(() => {
     if (currentAnimationAction) {
       currentAnimationAction.play();
     }
@@ -95,7 +123,7 @@ const useModelAnimations = (modelRef, gltf) => {
   return { mixer, animationsMap: animationsMapRef.current };
 };
 
-function Character({ charRef }) {
+function Character({ charRef, directionOffset, setDirectionOffset }) {
   // const modelRef = useRef();
   const { scene, animations } = useGLTF("/models/character.glb");
 
@@ -111,7 +139,12 @@ function Character({ charRef }) {
   }, [charRef]);
   useHelper(charRef, THREE.BoxHelper);
 
-  const { mixer } = useModelAnimations(charRef, { animations });
+  const { mixer } = useModelAnimations(
+    charRef,
+    { animations },
+    directionOffset,
+    setDirectionOffset
+  );
 
   // Update the mixer on each frame
   useFrame((_, delta) => {
@@ -141,6 +174,7 @@ function Ground() {
 
 function App() {
   const [gltf, setGltf] = useState({});
+  const [directionOffset, setDirectionOffset] = useState(Math.PI);
 
   const box = useRef(null);
   const charRef = useRef();
@@ -170,7 +204,7 @@ function App() {
       const rotateQuaternion = new THREE.Quaternion();
       rotateQuaternion.setFromAxisAngle(
         new THREE.Vector3(0, 1, 0),
-        angleCameraDirectionAxisY
+        angleCameraDirectionAxisY + directionOffset
       );
 
       charRef.current.quaternion.rotateTowards(
@@ -180,20 +214,18 @@ function App() {
     }
   });
 
-  const { mixer, animationsMap } = useModelAnimations(charRef, gltf);
-  const [currentAnimationAction, setCurrentAnimationAction] = useState(null);
-  const [currentAnimation, setCurrentAnimation] = useState("Idle");
-  // keydown
-
-  const processAnimation = () => {};
-
+  //hello
   return (
     <Suspense fallback={null}>
       <mesh ref={box}>
         {/* <primitive ref={charRef} object={scene} castShadow={true} /> */}
         <Ground />
         <group>
-          <Character charRef={charRef} />
+          <Character
+            charRef={charRef}
+            directionOffset={directionOffset}
+            setDirectionOffset={setDirectionOffset}
+          />
           {/* <mesh rotation-x={-Math.PI / 2} receiveShadow={true}>
             <planeGeometry args={[1000, 1000]} />
             <meshPhongMaterial color={0x878787} />
