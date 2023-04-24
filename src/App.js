@@ -13,7 +13,14 @@ import { Box3, DirectionalLightHelper, PointLightHelper } from "three";
 import * as THREE from "three";
 
 //FEAT: Character animation
-const useModelAnimations = (modelRef, gltf, setDirectionOffset, setSpeed) => {
+const useModelAnimations = (
+  modelRef,
+  gltf,
+  setDirectionOffset,
+  setSpeed,
+  setMaxspeed,
+  setAcceleration
+) => {
   const [mixer, setMixer] = useState(null);
   const [controls, setControls] = useState({});
 
@@ -70,14 +77,20 @@ const useModelAnimations = (modelRef, gltf, setDirectionOffset, setSpeed) => {
     if (controls.w || controls.a || controls.d || controls.s) {
       if (controls.shift) {
         newAnimationAction = animationsMap.get("Run");
-        setSpeed(350);
+        // setSpeed(350);
+        setMaxspeed(350);
+        setAcceleration(3);
       } else {
         newAnimationAction = animationsMap.get("Walk");
-        setSpeed(80);
+        // setSpeed(80);
+        setMaxspeed(80);
+        setAcceleration(3);
       }
     } else {
       newAnimationAction = animationsMap.get("Idle");
       setSpeed(0);
+      setMaxspeed(0);
+      setAcceleration(0);
     }
 
     if (
@@ -123,7 +136,13 @@ const useModelAnimations = (modelRef, gltf, setDirectionOffset, setSpeed) => {
 };
 
 //FEAT: Character
-function Character({ charRef, setDirectionOffset, setSpeed }) {
+function Character({
+  charRef,
+  setDirectionOffset,
+  setSpeed,
+  setMaxSpeed,
+  setAcceleration,
+}) {
   // const modelRef = useRef();
   const { scene, animations } = useGLTF("/models/character.glb");
 
@@ -143,7 +162,9 @@ function Character({ charRef, setDirectionOffset, setSpeed }) {
     charRef,
     { animations },
     setDirectionOffset,
-    setSpeed
+    setSpeed,
+    setMaxSpeed,
+    setAcceleration
   );
 
   // Update the mixer on each frame
@@ -177,6 +198,8 @@ function App() {
   const [gltf, setGltf] = useState({});
   const [directionOffset, setDirectionOffset] = useState(0);
   const [speed, setSpeed] = useState(0);
+  const [maxSpeed, setMaxSpeed] = useState(0);
+  const [acceleration, setAcceleration] = useState(0);
 
   const box = useRef(null);
   const charRef = useRef();
@@ -224,8 +247,11 @@ function App() {
 
       walkDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), directionOffset);
 
-      const moveX = walkDirection.x * speed * 0.005;
-      const moveZ = walkDirection.z * speed * 0.005;
+      if (speed < maxSpeed) setSpeed(speed + acceleration);
+      else setSpeed(speed - acceleration * 2);
+
+      const moveX = walkDirection.x * speed * 0.007;
+      const moveZ = walkDirection.z * speed * 0.007;
 
       charRef.current.position.x += moveX;
       charRef.current.position.z += moveZ;
@@ -254,6 +280,8 @@ function App() {
             directionOffset={directionOffset}
             setDirectionOffset={setDirectionOffset}
             setSpeed={setSpeed}
+            setMaxSpeed={setMaxSpeed}
+            setAcceleration={setAcceleration}
           />
           {/* <mesh rotation-x={-Math.PI / 2} receiveShadow={true}>
             <planeGeometry args={[1000, 1000]} />
