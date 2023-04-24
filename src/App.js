@@ -12,6 +12,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Box3, DirectionalLightHelper, PointLightHelper } from "three";
 import * as THREE from "three";
 
+//FEAT: Character animation
 const useModelAnimations = (modelRef, gltf, setDirectionOffset, setSpeed) => {
   const [mixer, setMixer] = useState(null);
   const [controls, setControls] = useState({});
@@ -121,8 +122,7 @@ const useModelAnimations = (modelRef, gltf, setDirectionOffset, setSpeed) => {
   return { mixer, animationsMap: animationsMapRef.current };
 };
 
-//TODO: Character
-
+//FEAT: Character
 function Character({ charRef, setDirectionOffset, setSpeed }) {
   // const modelRef = useRef();
   const { scene, animations } = useGLTF("/models/character.glb");
@@ -172,16 +172,17 @@ function Ground() {
   );
 }
 
-//TODO: App.js
+//FEAT: App.js
 function App() {
   const [gltf, setGltf] = useState({});
-  const [directionOffset, setDirectionOffset] = useState(Math.PI);
+  const [directionOffset, setDirectionOffset] = useState(0);
   const [speed, setSpeed] = useState(0);
 
   const box = useRef(null);
   const charRef = useRef();
   const pointRef = useRef();
   const cameraRef = useRef();
+  const orbitRef = useRef();
   const shadowLightRef = useRef();
   const { scene } = useThree();
 
@@ -214,6 +215,7 @@ function App() {
         THREE.MathUtils.degToRad(5)
       );
 
+      //FEAT: Character move
       const walkDirection = new THREE.Vector3();
       cameraRef.current.getWorldDirection(walkDirection);
 
@@ -227,6 +229,16 @@ function App() {
 
       charRef.current.position.x += moveX;
       charRef.current.position.z += moveZ;
+
+      cameraRef.current.position.x += moveX;
+      cameraRef.current.position.z += moveZ;
+
+      //FEAT: Camera moving by character move
+      orbitRef.current.target.set(
+        charRef.current.position.x,
+        charRef.current.position.y,
+        charRef.current.position.z
+      );
     }
   });
 
@@ -301,7 +313,7 @@ function App() {
           shadow-radius={5}
         />
         <axesHelper args={[1000]} />
-        <OrbitControls target={[0, 100, 0]} />
+        <OrbitControls ref={orbitRef} target={[0, 100, 0]} />
       </mesh>
     </Suspense>
   );
