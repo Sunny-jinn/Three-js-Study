@@ -110,7 +110,7 @@ const useModelAnimations = (
     } else if (controls.a) {
       setDirectionOffset(Math.PI / 2);
     } else if (controls.d) {
-      setDirectionOffset(-Math.PI / 4);
+      setDirectionOffset(-Math.PI / 2);
     }
   }, [controls]);
 
