@@ -12,12 +12,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Box3, DirectionalLightHelper, PointLightHelper } from "three";
 import * as THREE from "three";
 
-const useModelAnimations = (
-  modelRef,
-  gltf,
-  directionOffset,
-  setDirectionOffset
-) => {
+const useModelAnimations = (modelRef, gltf, setDirectionOffset, setSpeed) => {
   const [mixer, setMixer] = useState(null);
   const [controls, setControls] = useState({});
 
@@ -74,11 +69,14 @@ const useModelAnimations = (
     if (controls.w || controls.a || controls.d || controls.s) {
       if (controls.shift) {
         newAnimationAction = animationsMap.get("Run");
+        setSpeed(350);
       } else {
         newAnimationAction = animationsMap.get("Walk");
+        setSpeed(80);
       }
     } else {
       newAnimationAction = animationsMap.get("Idle");
+      setSpeed(0);
     }
 
     if (
@@ -123,7 +121,9 @@ const useModelAnimations = (
   return { mixer, animationsMap: animationsMapRef.current };
 };
 
-function Character({ charRef, directionOffset, setDirectionOffset }) {
+//TODO: Character
+
+function Character({ charRef, setDirectionOffset, setSpeed }) {
   // const modelRef = useRef();
   const { scene, animations } = useGLTF("/models/character.glb");
 
@@ -142,8 +142,8 @@ function Character({ charRef, directionOffset, setDirectionOffset }) {
   const { mixer } = useModelAnimations(
     charRef,
     { animations },
-    directionOffset,
-    setDirectionOffset
+    setDirectionOffset,
+    setSpeed
   );
 
   // Update the mixer on each frame
@@ -172,9 +172,11 @@ function Ground() {
   );
 }
 
+//TODO: App.js
 function App() {
   const [gltf, setGltf] = useState({});
   const [directionOffset, setDirectionOffset] = useState(Math.PI);
+  const [speed, setSpeed] = useState(0);
 
   const box = useRef(null);
   const charRef = useRef();
@@ -211,6 +213,20 @@ function App() {
         rotateQuaternion,
         THREE.MathUtils.degToRad(5)
       );
+
+      const walkDirection = new THREE.Vector3();
+      cameraRef.current.getWorldDirection(walkDirection);
+
+      walkDirection.y = 0;
+      walkDirection.normalize();
+
+      walkDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), directionOffset);
+
+      const moveX = walkDirection.x * speed * 0.005;
+      const moveZ = walkDirection.z * speed * 0.005;
+
+      charRef.current.position.x += moveX;
+      charRef.current.position.z += moveZ;
     }
   });
 
@@ -225,6 +241,7 @@ function App() {
             charRef={charRef}
             directionOffset={directionOffset}
             setDirectionOffset={setDirectionOffset}
+            setSpeed={setSpeed}
           />
           {/* <mesh rotation-x={-Math.PI / 2} receiveShadow={true}>
             <planeGeometry args={[1000, 1000]} />
