@@ -6,9 +6,12 @@ import {
   PerspectiveCamera,
   useGLTF,
   useHelper,
+  Box,
 } from "@react-three/drei";
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+// import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { Octree } from "three/examples/jsm/math/Octree";
+import { Capsule } from "three/examples/jsm/math/Capsule";
 import { Box3, DirectionalLightHelper, PointLightHelper } from "three";
 import * as THREE from "three";
 
@@ -154,6 +157,15 @@ function Character({
       const box = new Box3().setFromObject(charRef.current);
       const offsetY = (box.max.y - box.min.y) / 2;
       charRef.current.position.y = offsetY;
+
+      const height = box.max.y - box.min.y;
+      const diameter = box.max.z - box.min.z;
+
+      charRef.current._capsule = new Capsule(
+        new THREE.Vector3(0, diameter / 2, 0),
+        new THREE.Vector3(0, height - diameter / 2, 0),
+        diameter / 2
+      );
     }
   }, [charRef]);
   useHelper(charRef, THREE.BoxHelper);
@@ -184,9 +196,18 @@ function Character({
   );
 }
 
-function Ground() {
+function Ground({ worldOctree }) {
+  const meshRef = useRef();
+
+  //FEAT: 단순히 worldOctree.fromGraphNode함수를 실행하는 것이 아닌 컴포넌트가 마운트 된 후 실행하기 위해 useEffect사용
+  useEffect(() => {
+    if (meshRef.current) {
+      worldOctree.fromGraphNode(meshRef.current);
+    }
+  }, [meshRef, worldOctree]);
+
   return (
-    <mesh rotation-x={-Math.PI / 2} receiveShadow={true}>
+    <mesh ref={meshRef} rotation-x={-Math.PI / 2} receiveShadow={true}>
       <planeGeometry args={[1000, 1000]} />
       <meshPhongMaterial color={0x878787} />
     </mesh>
@@ -200,8 +221,14 @@ function App() {
   const [speed, setSpeed] = useState(0);
   const [maxSpeed, setMaxSpeed] = useState(0);
   const [acceleration, setAcceleration] = useState(0);
+  const [fallingAcceleration, setFallingAcceleration] = useState(0);
+  const [fallingSpeed, setFallingSpeed] = useState(0);
+  const [onTheGround, setOnTheGround] = useState(false);
+
+  const worldOctree = new Octree();
 
   const box = useRef(null);
+  const boxRef = useRef();
   const charRef = useRef();
   const pointRef = useRef();
   const cameraRef = useRef();
@@ -218,6 +245,12 @@ function App() {
       scene.add(shadowLightRef.current.target);
     }
   }, [shadowLightRef, scene]);
+
+  useEffect(() => {
+    if (boxRef.current) {
+      worldOctree.fromGraphNode(boxRef.current);
+    }
+  }, [boxRef, worldOctree]);
 
   useFrame(() => {
     if (charRef.current && cameraRef.current) {
@@ -242,7 +275,8 @@ function App() {
       const walkDirection = new THREE.Vector3();
       cameraRef.current.getWorldDirection(walkDirection);
 
-      walkDirection.y = 0;
+      walkDirection.y = onTheGround ? 0 : -1;
+      // walkDirection.y = 0;
       walkDirection.normalize();
 
       walkDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), directionOffset);
@@ -250,14 +284,69 @@ function App() {
       if (speed < maxSpeed) setSpeed(speed + acceleration);
       else setSpeed(speed - acceleration * 2);
 
-      const moveX = walkDirection.x * speed * 0.007;
-      const moveZ = walkDirection.z * speed * 0.007;
+      if (!onTheGround) {
+        setFallingAcceleration(
+          (fallingAcceleration) => (fallingAcceleration += 1)
+        );
+        setFallingSpeed(
+          (fallingSpeed) => (fallingSpeed += Math.pow(fallingAcceleration, 2))
+        );
+      } else {
+        setFallingAcceleration(0);
+        setFallingSpeed(0);
+      }
 
-      charRef.current.position.x += moveX;
-      charRef.current.position.z += moveZ;
+      const velocity = new THREE.Vector3(
+        walkDirection.x * speed,
+        walkDirection.y * fallingSpeed,
+        walkDirection.z * speed
+      );
 
-      cameraRef.current.position.x += moveX;
-      cameraRef.current.position.z += moveZ;
+      const deltaPosition = velocity.clone().multiplyScalar(0.007);
+
+      charRef.current._capsule.translate(deltaPosition);
+
+      //FEAT: 충돌을 감지하면 이 result가 유효한 값을 가짐
+      const result = worldOctree.capsuleIntersect(charRef.current._capsule);
+
+      if (result) {
+        // 충돌한 경우
+        console.log("충돌함");
+        charRef.current._capsule.translate(
+          result.normal.multiplyScalar(result.depth)
+        ); //충돌했을 경우 캡슐을 이동시키는 것임
+        setOnTheGround(true);
+      } else {
+        console.log("충돌안함");
+        //충돌하지 않은 경우
+        setOnTheGround(false);
+      }
+
+      const previousPosition = charRef.current.position.clone();
+      const capsuleHeight =
+        charRef.current._capsule.end.y -
+        charRef.current._capsule.start.y +
+        charRef.current._capsule.radius * 2;
+      charRef.current.position.set(
+        charRef.current._capsule.start.x,
+        charRef.current._capsule.start.y -
+          charRef.current._capsule.radius +
+          capsuleHeight / 2,
+        charRef.current._capsule.start.z
+      );
+
+      // const moveX = walkDirection.x * speed * 0.007;
+      // const moveZ = walkDirection.z * speed * 0.007;
+
+      // charRef.current.position.x += moveX;
+      // charRef.current.position.z += moveZ;
+
+      // cameraRef.current.position.x += moveX;
+      // cameraRef.current.position.z += moveZ;
+      cameraRef.current.position.x -=
+        previousPosition.x - charRef.current.position.x;
+      cameraRef.current.position.z -=
+        previousPosition.z - charRef.current.position.z;
 
       //FEAT: Camera moving by character move
       orbitRef.current.target.set(
@@ -273,7 +362,7 @@ function App() {
     <Suspense fallback={null}>
       <mesh ref={box}>
         {/* <primitive ref={charRef} object={scene} castShadow={true} /> */}
-        <Ground />
+        <Ground worldOctree={worldOctree} />
         <group>
           <Character
             charRef={charRef}
@@ -341,7 +430,21 @@ function App() {
           shadow-radius={5}
         />
         <axesHelper args={[1000]} />
-        <OrbitControls ref={orbitRef} target={[0, 100, 0]} />
+        <Box
+          ref={boxRef}
+          args={[100, 50, 100]}
+          position={[150, 0, 0]}
+          receiveShadow
+          castShadow
+        >
+          <meshPhongMaterial color={0x878787} />
+        </Box>
+        <OrbitControls
+          ref={orbitRef}
+          target={[0, 100, 0]}
+          enablePan={false}
+          enableDamping={true}
+        />
       </mesh>
     </Suspense>
   );

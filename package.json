@@ -15,6 +15,8 @@
     "react-scripts": "5.0.1",
     "styled-components": "^5.3.8",
     "three": "^0.150.1",
+    "three-octree": "^0.6.1",
+    "three-stdlib": "^2.21.9",
     "use-cannon": "^0.5.3",
     "web-vitals": "^2.1.4"
   },
