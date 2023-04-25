@@ -9,7 +9,7 @@ import {
   Box,
 } from "@react-three/drei";
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
-// import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Octree } from "three/examples/jsm/math/Octree";
 import { Capsule } from "three/examples/jsm/math/Capsule";
 import { Box3, DirectionalLightHelper, PointLightHelper } from "three";
@@ -81,12 +81,12 @@ const useModelAnimations = (
       if (controls.shift) {
         newAnimationAction = animationsMap.get("Run");
         // setSpeed(350);
-        setMaxspeed(350);
+        setMaxspeed(900);
         setAcceleration(3);
       } else {
         newAnimationAction = animationsMap.get("Walk");
         // setSpeed(80);
-        setMaxspeed(80);
+        setMaxspeed(350);
         setAcceleration(3);
       }
     } else {
@@ -216,7 +216,6 @@ function Ground({ worldOctree }) {
 
 //FEAT: App.js
 function App() {
-  const [gltf, setGltf] = useState({});
   const [directionOffset, setDirectionOffset] = useState(0);
   const [speed, setSpeed] = useState(0);
   const [maxSpeed, setMaxSpeed] = useState(0);
@@ -224,6 +223,8 @@ function App() {
   const [fallingAcceleration, setFallingAcceleration] = useState(0);
   const [fallingSpeed, setFallingSpeed] = useState(0);
   const [onTheGround, setOnTheGround] = useState(false);
+  const gltf = useLoader(GLTFLoader, "/models/space.glb");
+  const modelRef = useRef();
 
   const worldOctree = new Octree();
 
@@ -251,6 +252,23 @@ function App() {
       worldOctree.fromGraphNode(boxRef.current);
     }
   }, [boxRef, worldOctree]);
+
+  useEffect(() => {
+    if (gltf) {
+      gltf.scene.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+    }
+  }, [gltf]);
+
+  useFrame(() => {
+    if (modelRef.current) {
+      worldOctree.fromGraphNode(modelRef.current);
+    }
+  });
 
   useFrame(() => {
     if (charRef.current && cameraRef.current) {
@@ -311,14 +329,14 @@ function App() {
 
       if (result) {
         // 충돌한 경우
-        console.log("충돌함");
+        console.log("충돌함!");
         charRef.current._capsule.translate(
           result.normal.multiplyScalar(result.depth)
         ); //충돌했을 경우 캡슐을 이동시키는 것임
         setOnTheGround(true);
       } else {
-        console.log("충돌안함");
         //충돌하지 않은 경우
+        console.log("충돌 안함!");
         setOnTheGround(false);
       }
 
@@ -362,7 +380,8 @@ function App() {
     <Suspense fallback={null}>
       <mesh ref={box}>
         {/* <primitive ref={charRef} object={scene} castShadow={true} /> */}
-        <Ground worldOctree={worldOctree} />
+        {/* <Ground worldOctree={worldOctree} /> */}
+        <primitive ref={modelRef} object={gltf.scene} />
         <group>
           <Character
             charRef={charRef}
@@ -430,7 +449,7 @@ function App() {
           shadow-radius={5}
         />
         <axesHelper args={[1000]} />
-        <Box
+        {/* <Box
           ref={boxRef}
           args={[100, 50, 100]}
           position={[150, 0, 0]}
@@ -438,7 +457,7 @@ function App() {
           castShadow
         >
           <meshPhongMaterial color={0x878787} />
-        </Box>
+        </Box> */}
         <OrbitControls
           ref={orbitRef}
           target={[0, 100, 0]}
