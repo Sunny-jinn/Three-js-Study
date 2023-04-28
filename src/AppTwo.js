@@ -1,11 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { OrbitControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import { useFrame, useLoader } from "@react-three/fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { MeshStandardMaterial } from "three";
 
 const AppTwo = () => {
   const [controls, setControls] = useState({});
+  //   const { scene, animations } = useGLTF("/models/prevChar.glb");
+  //   const gltf = useLoader(GLTFLoader, "/models/prevChar2.glb");
+  const gltf = useLoader(GLTFLoader, "/models/newChar.glb");
+  //   const material = new MeshStandardMaterial({ color: 0xffffff });
+
+  //   gltf.scene.traverse((child) => {
+  //     if (child.isMesh) {
+  //       child.material = material;
+  //     }
+  //   });
 
   const boxRef = useRef();
+  const charRef = useRef();
 
   useEffect(() => {
     const keyDownPressHandler = (e) => {
@@ -40,12 +53,18 @@ const AppTwo = () => {
 
   return (
     <>
-      <mesh ref={boxRef}>
+      {/* <mesh ref={boxRef} position={[0, 50, 0]}>
         <boxGeometry args={[75, 75, 75]} />
         <meshPhongMaterial color={0xff0000} />
+      </mesh> */}
+      <mesh scale={40} ref={boxRef}>
+        <primitive object={gltf.scene} ref={charRef} />
       </mesh>
-      <ambientLight color={0xffffff} intensity={0.7} />
-      <pointLight position={[150, 150, 150]} />
+      <ambientLight color={0xffffff} intensity={1} />
+      <pointLight position={[50, 50, 50]} intensity={1.5} />
+      <pointLight position={[-50, 70, -50]} intensity={1.5} />
+      <pointLight position={[50, 70, -50]} intensity={1.5} />
+      <pointLight position={[-50, 70, 50]} intensity={1.5} />
       <OrbitControls />
     </>
   );
