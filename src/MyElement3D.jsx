@@ -1,97 +1,85 @@
-import {
-  Box,
-  CubeCamera,
-  MeshReflectorMaterial,
-  MeshRefractionMaterial,
-  OrbitControls,
-  useTexture,
-} from "@react-three/drei";
-import { useFrame, useLoader } from "@react-three/fiber";
-import { useControls } from "leva";
+import { OrbitControls, useTexture } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { RGBELoader } from "three-stdlib";
 
 const MyElement3D = () => {
-  // Drei : R3F에서 사용할 수 있는 유용한 컴포넌트들을 모아놓은 라이브러리
-  const refMesh = useRef();
-  const refWireMesh = useRef();
-  const mesh2 = useRef();
+  const mesh = useRef();
 
-  const texture = useLoader(
-    RGBELoader,
-    "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/aerodynamics_workshop_1k.hdr"
-  );
+  useEffect(() => {
+    textures.map.repeat.x =
+      textures.displacementMap.repeat.x =
+      textures.aoMap.repeat.x =
+      textures.roughnessMap.repeat.x =
+      textures.metalnessMap.repeat.x =
+      textures.normalMap.repeat.x =
+      textures.alphaMap.repeat.x =
+        4;
 
-  // const { xSize, ySize, zSize, xSegments, ySegments, zSegments } = useControls({
-  //   xSize: { value: 1, min: 0.1, max: 5, step: 0.01 },
-  //   ySize: { value: 1, min: 0.1, max: 5, step: 0.01 },
-  //   zSize: { value: 1, min: 0.1, max: 5, step: 0.01 },
-  //   xSegments: { value: 1, min: 1, max: 10, step: 1 },
-  //   ySegments: { value: 1, min: 1, max: 10, step: 1 },
-  //   zSegments: { value: 1, min: 1, max: 10, step: 1 },
-  // });
+    textures.map.wrapS =
+      textures.displacementMap.wrapS =
+      textures.aoMap.wrapS =
+      textures.roughnessMap.wrapS =
+      textures.metalnessMap.wrapS =
+      textures.normalMap.wrapS =
+      textures.alphaMap.wrapS =
+        THREE.MirroredRepeatWrapping;
 
-  /*
-    FEAT: BOX Geometry를 두 개 사용하지 않고 위치가 같고 
-    와이어 프레임처럼 사용할 시 이렇게 useEffect를 사용하여 
-    메모리 낭비를 줄일 수 있음
-  */
-  // useEffect(() => {
-  //   refWireMesh.current.geometry = refMesh.current.geometry;
-  // }, [xSize, ySize, zSize, xSegments, ySegments, zSegments]);
+    textures.map.needsUpdate =
+      textures.displacementMap.needsUpdate =
+      textures.aoMap.needsUpdate =
+      textures.roughnessMap.needsUpdate =
+      textures.metalnessMap.needsUpdate =
+      textures.normalMap.needsUpdate =
+      textures.alphaMap.needsUpdate =
+        true;
 
-  // const mapcap = useTexture("./images/mapcap.jpg");
+    mesh.current.geometry.setAttribute(
+      "uv2",
+      new THREE.BufferAttribute(mesh.current.geometry.attributes.uv.array, 2)
+    );
+  }, []);
 
+  const textures = useTexture({
+    map: "./images/glass/Glass_Window_002_basecolor.jpg",
+    roughnessMap: "./images/glass/Glass_Window_002_roughness.jpg",
+    metalnessMap: "./images/glass/Glass_Window_002_metallic.jpg",
+    normalMap: "./images/glass/Glass_Window_002_normal.jpg",
+    displacementMap: "./images/glass/Glass_Window_002_height.png",
+    aoMap: "./images/glass/Glass_Window_002_ambientOcclusion.jpg",
+    alphaMap: "./images/glass/Glass_Window_002_opacity_.jpg",
+  });
   return (
     <>
       <OrbitControls />
 
       <ambientLight intensity={0.1} />
-      <directionalLight position={[0, 1, 0]} />
-      <directionalLight position={[1, 2, 8]} intensity={0.7} />
+      <directionalLight position={[0, 1, -8]} intensity={0.5} />
+      <directionalLight position={[1, 2, 8]} intensity={0.5} />
 
-      <CubeCamera resolution={1024} frames={1} envMap={texture}>
-        {(texture) => (
-          <mesh>
-            <dodecahedronGeometry />
-            <MeshRefractionMaterial
-              envMap={texture}
-              toneMapped={false}
-              bounces={2}
-              aberrationStrength={0.03}
-              ior={2.75}
-              fresnel={1}
-              color={0xffffff}
-              fastChroma={true}
-            />
-          </mesh>
-        )}
-      </CubeCamera>
-
-      {
-        //FEAT: 바닥에 reflection 주는 코드
-        /* <mesh position={[0, -0.6, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <MeshReflectorMaterial
-          blur={[300, 100]}
-          resolution={2048}
-          mixBlur={1}
-          mixStrength={30}
-          roughness={1}
-          depthScale={0.7}
-          minDepthThreshold={0.4}
-          maxDepthThreshold={1.4}
+      <mesh ref={mesh}>
+        <cylinderGeometry args={[2, 2, 3, 256, 256, true]} />
+        <meshStandardMaterial
+          transparent
+          side={THREE.DoubleSide}
+          map={textures.map}
+          roughness={2}
+          roughnessMap={textures.roughnessMap}
+          roughnessMap-colorSpace={THREE.NoColorSpace}
           metalness={0.5}
-          color={0x050505}
+          metalnessMap={textures.metalnessMap}
+          metalnessMap-colorSpace={THREE.NoColorSpace}
+          normalMap={textures.normalMap}
+          normalMap-colorSpace={THREE.NoColorSpace}
+          normalScale={1}
+          displacementMap={textures.displacementMap}
+          displacementMap-colorSpace={THREE.NoColorSpace}
+          displacementScale={0.2}
+          displacementBias={-0.2}
+          aoMap={textures.aoMap}
+          alphaMap={textures.alphaMap}
+          // alphaToCoverage
         />
       </mesh>
-
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry />
-        <meshStandardMaterial color={"cyan"} />
-      </mesh> */
-      }
     </>
   );
 };
