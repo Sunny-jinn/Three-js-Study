@@ -1,6 +1,10 @@
 import {
+  AccumulativeShadows,
+  ContactShadows,
   Environment,
   OrbitControls,
+  RandomizedLight,
+  SoftShadows,
   useHelper,
   useTexture,
 } from "@react-three/drei";
@@ -17,28 +21,11 @@ const torusMaterial = new THREE.MeshStandardMaterial({
 });
 
 const MyElement3D = () => {
-  const light = useRef();
-
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     const smallShperePivot = state.scene.getObjectByName("smallSpherePivot");
-    smallShperePivot.rotation.y = THREE.MathUtils.degToRad(time * 10);
-    smallShperePivot.children[0].getWorldPosition(
-      light.current.target.position
-    );
+    smallShperePivot.rotation.y = THREE.MathUtils.degToRad(time * 50);
   });
-
-  const { scene } = useThree();
-
-  useEffect(() => {
-    scene.add(light.current.target);
-    // shadowCamera.current = new THREE.CameraHelper(light.current.shadow.camera);
-    // scene.add(shadowCamera.current);
-    return () => {
-      scene.remove(light.current.target);
-      // scene.remove(shadowCamera.current);
-    };
-  }, [light.current]);
 
   return (
     <>
@@ -46,50 +33,33 @@ const MyElement3D = () => {
 
       <ambientLight intensity={0.1} />
 
-      <spotLight
-        ref={light}
-        shadow-mapSize={[512 * 4, 512 * 4]}
-        castShadow
-        color={0xffffff}
-        intensity={0.9}
-        position={[0, 5, 0]}
-        angle={THREE.MathUtils.degToRad(60)}
+      <directionalLight color={0xffffff} intensity={1} position={[0, 5, 0]} />
+      {/**
+       * FEAT: ContactShadows는 R3F의 그림자 기술이 아닌
+       * 독립적인 그림자이기에 Canvas에서 shadows를 지워도 되고
+       * mesh에서 castshadow와 receiveshadow 속성을 추가하지 않아도 된다
+       */}
+      <ContactShadows
+        position={[0, 0, 0]}
+        scale={10}
+        resolution={512}
+        color={0xff0000}
+        opacity={1}
+        blur={0.5}
+        frames={1} //정적인 그림자로 사용하고 싶을 때
       />
 
-      {/* pointLight Shadow
-       <pointLight
-        ref={light}
-        castShadow
-        color={0xffffff}
-        intensity={1}
-        position={[0, 5, 0]}
-      /> */}
-      {/* FEAT: directionalLight Shadow
-      <directionalLight
-        castShadow
-        ref={light}
-        shadow-camera-top={6}
-        shadow-camera-bottom={-6}
-        shadow-camera-left={-6}
-        shadow-camera-right={6}
-        shadow-mapSize={[512 * 4, 512 * 4]}
-        color={0xffffff}
-        intensity={0.9}
-        position={[0, 5, 0]}
-        target-position={[0, 0, 0]}
-      /> */}
-
-      <mesh receiveShadow rotation-x={THREE.MathUtils.degToRad(-90)}>
+      {/* <mesh rotation-x={THREE.MathUtils.degToRad(-90)}>
         <planeGeometry args={[10, 10]} />
         <meshStandardMaterial
-          color={"#2c3e50"}
+          color={0x2c3e50}
           roughness={0.5}
           metalness={0.5}
           side={THREE.DoubleSide}
         />
-      </mesh>
+      </mesh> */}
 
-      <mesh castShadow receiveShadow position-y={1.7}>
+      <mesh position-y={1.7}>
         <torusKnotGeometry args={[1, 0.2, 128, 32]} />
         <meshStandardMaterial
           color={"#ffffff"}
@@ -102,8 +72,6 @@ const MyElement3D = () => {
         return (
           <group key={index} rotation-y={THREE.MathUtils.degToRad(45 * index)}>
             <mesh
-              castShadow
-              receiveShadow
               geometry={torusGeometry}
               material={torusMaterial}
               position={[3, 0.5, 0]}
@@ -113,7 +81,7 @@ const MyElement3D = () => {
       })}
 
       <group name="smallSpherePivot">
-        <mesh castShadow position={[3, 0.5, 0]}>
+        <mesh position={[3, 0.5, 0]}>
           <sphereGeometry args={[0.3, 32, 32]} />
           <meshStandardMaterial
             color={0xe74c3c}
@@ -122,6 +90,27 @@ const MyElement3D = () => {
           />
         </mesh>
       </group>
+      {/**
+       * FEAT: Accumulavtive shadow는 정적인 그림자로 한 번 생성되면 움직이지
+       * 않지만 GPU나 CPU의 처리 역시 0으로 수렴
+       */}
+      {/* <AccumulativeShadows
+        position={[0, 0.01, 0]}
+        scale={12}
+        color="#000000"
+        opacity={0.7}
+        alphaTest={1}
+        frames={Infinity}
+        temporal
+        blend={30}
+      >
+        <RandomizedLight
+          radius={0.5}
+          ambient={0.21}
+          intensity={1.5}
+          position={[5, 3, 0]}
+        />
+      </AccumulativeShadows> */}
     </>
   );
 };
