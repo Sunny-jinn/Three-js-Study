@@ -18,32 +18,68 @@ const torusMaterial = new THREE.MeshStandardMaterial({
 
 const MyElement3D = () => {
   const light = useRef();
+
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     const smallShperePivot = state.scene.getObjectByName("smallSpherePivot");
-    smallShperePivot.rotation.y = THREE.MathUtils.degToRad(time * 50);
-
-    const target = new THREE.Vector3();
-    smallShperePivot.children[0].getWorldPosition(target);
-    state.camera.position.copy(target);
-
-    const ghostSpherePivot = state.scene.getObjectByName("ghostSpherePivot");
-    ghostSpherePivot.rotation.y = THREE.MathUtils.degToRad(time * 50 + 30);
-    ghostSpherePivot.children[0].getWorldPosition(target);
-    state.camera.lookAt(target);
+    smallShperePivot.rotation.y = THREE.MathUtils.degToRad(time * 10);
+    smallShperePivot.children[0].getWorldPosition(
+      light.current.target.position
+    );
   });
 
-  useHelper(light, THREE.SpotLightHelper);
+  const { scene } = useThree();
 
-  const { camera } = useThree();
+  useEffect(() => {
+    scene.add(light.current.target);
+    // shadowCamera.current = new THREE.CameraHelper(light.current.shadow.camera);
+    // scene.add(shadowCamera.current);
+    return () => {
+      scene.remove(light.current.target);
+      // scene.remove(shadowCamera.current);
+    };
+  }, [light.current]);
 
   return (
     <>
-      {/* <OrbitControls /> */}
+      <OrbitControls />
 
-      <Environment files={"./images/rural_asphalt_road_4k.hdr"} />
+      <ambientLight intensity={0.1} />
 
-      <mesh rotation-x={THREE.MathUtils.degToRad(-90)}>
+      <spotLight
+        ref={light}
+        shadow-mapSize={[512 * 4, 512 * 4]}
+        castShadow
+        color={0xffffff}
+        intensity={0.9}
+        position={[0, 5, 0]}
+        angle={THREE.MathUtils.degToRad(60)}
+      />
+
+      {/* pointLight Shadow
+       <pointLight
+        ref={light}
+        castShadow
+        color={0xffffff}
+        intensity={1}
+        position={[0, 5, 0]}
+      /> */}
+      {/* FEAT: directionalLight Shadow
+      <directionalLight
+        castShadow
+        ref={light}
+        shadow-camera-top={6}
+        shadow-camera-bottom={-6}
+        shadow-camera-left={-6}
+        shadow-camera-right={6}
+        shadow-mapSize={[512 * 4, 512 * 4]}
+        color={0xffffff}
+        intensity={0.9}
+        position={[0, 5, 0]}
+        target-position={[0, 0, 0]}
+      /> */}
+
+      <mesh receiveShadow rotation-x={THREE.MathUtils.degToRad(-90)}>
         <planeGeometry args={[10, 10]} />
         <meshStandardMaterial
           color={"#2c3e50"}
@@ -53,8 +89,8 @@ const MyElement3D = () => {
         />
       </mesh>
 
-      <mesh rotation-x={THREE.MathUtils.degToRad(-90)}>
-        <sphereGeometry args={[1.5, 64, 64, 0, Math.PI]} />
+      <mesh castShadow receiveShadow position-y={1.7}>
+        <torusKnotGeometry args={[1, 0.2, 128, 32]} />
         <meshStandardMaterial
           color={"#ffffff"}
           roughness={0.1}
@@ -66,6 +102,8 @@ const MyElement3D = () => {
         return (
           <group key={index} rotation-y={THREE.MathUtils.degToRad(45 * index)}>
             <mesh
+              castShadow
+              receiveShadow
               geometry={torusGeometry}
               material={torusMaterial}
               position={[3, 0.5, 0]}
@@ -75,7 +113,7 @@ const MyElement3D = () => {
       })}
 
       <group name="smallSpherePivot">
-        <mesh position={[3, 0.5, 0]}>
+        <mesh castShadow position={[3, 0.5, 0]}>
           <sphereGeometry args={[0.3, 32, 32]} />
           <meshStandardMaterial
             color={0xe74c3c}
@@ -83,10 +121,6 @@ const MyElement3D = () => {
             metalness={0.5}
           />
         </mesh>
-      </group>
-
-      <group name="ghostSpherePivot">
-        <object3D position={[3, 0.5, 0]} />
       </group>
     </>
   );

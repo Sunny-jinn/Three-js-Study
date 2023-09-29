@@ -6,9 +6,10 @@ const AppThree = () => {
   return (
     <>
       <Canvas
+        shadows
         camera={{
-          fov: 130,
-          near: 0.1,
+          fov: 75,
+          near: 1,
           far: 20,
           position: [7, 7, 0],
         }}
