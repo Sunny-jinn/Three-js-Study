@@ -1,59 +1,35 @@
-import {
-  Environment,
-  OrbitControls,
-  useAnimations,
-  useGLTF,
-} from "@react-three/drei";
-import { useControls } from "leva";
-import { useEffect, useState } from "react";
+import { Box, OrbitControls, Sphere, Torus } from "@react-three/drei";
+import { BallCollider, RigidBody } from "@react-three/rapier";
 
 const MyElement3D = () => {
-  const model = useGLTF("./models/model.glb");
-  const animations = useAnimations(model.animations, model.scene);
-
-  const { actionName } = useControls({
-    actionName: {
-      value: animations.names[1],
-      options: animations.names,
-    },
-  });
-
-  useEffect(() => {
-    const action = animations.actions[actionName];
-    action.reset().fadeIn(0.5).play();
-    return () => {
-      action.fadeOut(0.5);
-    };
-  }, [actionName]);
-
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    let minY = Infinity,
-      maxY = -Infinity;
-
-    model.scene.traverse((item) => {
-      if (item.isMesh) {
-        const geomBbox = item.geometry.boundingBox;
-        if (minY > geomBbox.min.y) minY = geomBbox.min.y;
-        if (maxY < geomBbox.max.y) maxY = geomBbox.max.y;
-      }
-    });
-
-    const h = maxY - minY;
-    setHeight(h);
-  }, [model.scene]);
-
   return (
     <>
       <OrbitControls />
 
-      <Environment blur={0.05} files={"./images/rural_asphalt_road_4k.hdr"} />
-      <primitive
-        scale={5}
-        object={model.scene}
-        position-y={-(height / 2) * 5}
-      />
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[-10, 10, 0]} intensity={0.4} />
+
+      <RigidBody position={[0, 5, 0]} colliders={false} gravityScale={4}>
+        <BallCollider args={[1]} position={[0, 1, 0]} />
+        <Sphere position-y={1}>
+          <meshStandardMaterial color={"hotpink"} />
+        </Sphere>
+        <Box>
+          <meshStandardMaterial color={"royalblue"} />
+        </Box>
+      </RigidBody>
+
+      <RigidBody position={[-2, 5, 0]} colliders="trimesh">
+        <Torus>
+          <meshStandardMaterial color={"orange"} />
+        </Torus>
+      </RigidBody>
+
+      <RigidBody type="fixed" restitution={2}>
+        <Box position={[0, 0, 0]} args={[10, 1, 10]}>
+          <meshStandardMaterial color={"springgreen"} />
+        </Box>
+      </RigidBody>
     </>
   );
 };
