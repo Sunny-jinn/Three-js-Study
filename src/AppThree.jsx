@@ -5,7 +5,12 @@ import MyElement3D from "./MyElement3D";
 const AppThree = () => {
   return (
     <>
-      <Canvas>
+      <Canvas
+        camera={{
+          fov: 75,
+          position: [7, 7, 0],
+        }}
+      >
         <MyElement3D />
       </Canvas>
     </>
