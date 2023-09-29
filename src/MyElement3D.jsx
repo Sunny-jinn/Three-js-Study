@@ -22,27 +22,20 @@ const MyElement3D = () => {
     const time = state.clock.elapsedTime;
     const smallShperePivot = state.scene.getObjectByName("smallSpherePivot");
     smallShperePivot.rotation.y = THREE.MathUtils.degToRad(time * 50);
+
+    const target = new THREE.Vector3();
+    smallShperePivot.children[0].getWorldPosition(target);
+    state.camera.position.copy(target);
+
+    const ghostSpherePivot = state.scene.getObjectByName("ghostSpherePivot");
+    ghostSpherePivot.rotation.y = THREE.MathUtils.degToRad(time * 50 + 30);
+    ghostSpherePivot.children[0].getWorldPosition(target);
+    state.camera.lookAt(target);
   });
 
   useHelper(light, THREE.SpotLightHelper);
 
   const { camera } = useThree();
-  useControls({
-    positionZ: {
-      value: 0,
-      min: -10,
-      max: 10,
-      step: 0.1,
-      onChange: (v) => (camera.position.z = v),
-    },
-    targetZ: {
-      value: 0,
-      min: -10,
-      max: 10,
-      step: 0.1,
-      onChange: (v) => camera.lookAt(0, 0, v),
-    },
-  });
 
   return (
     <>
@@ -90,6 +83,10 @@ const MyElement3D = () => {
             metalness={0.5}
           />
         </mesh>
+      </group>
+
+      <group name="ghostSpherePivot">
+        <object3D position={[3, 0.5, 0]} />
       </group>
     </>
   );

@@ -7,8 +7,8 @@ const AppThree = () => {
     <>
       <Canvas
         camera={{
-          fov: 75,
-          near: 1,
+          fov: 130,
+          near: 0.1,
           far: 20,
           position: [7, 7, 0],
         }}
