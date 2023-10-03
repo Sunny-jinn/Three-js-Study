@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 
 const io = new Server({
   cors: {
-    origin: "http://localhost:5174",
+    origin: "http://localhost:5173",
   },
 });
 
@@ -10,8 +10,38 @@ io.listen(3001);
 
 const characters = [];
 
+const items = {
+  table: {
+    name: "Table",
+    size: [3, 5],
+  },
+  chair: {
+    name: "Chair",
+    size: [2, 2],
+  },
+  couch: {
+    name: "Couch Small",
+    size: [3, 2],
+  },
+  stepCubbyStorage: {
+    name: "Step Cubby Storage",
+    size: [4, 2],
+  },
+};
+
+const map = {
+  size: [10, 10],
+  gridDivision: 2,
+  items: [
+    {
+      ...items.chair,
+      gridPosition: [0, 0],
+    },
+  ],
+};
+
 const generateRandomPosition = () => {
-  return [Math.random() * 3, 0, Math.random() * 3];
+  return [Math.random() * map.size[0], 0, Math.random() * map.size[1]];
 };
 
 const generateRandomHexColor = () => {
@@ -29,7 +59,12 @@ io.on("connection", (socket) => {
     bottomColor: generateRandomHexColor(),
   });
 
-  socket.emit("hello");
+  socket.emit("hello", {
+    map,
+    characters,
+    id: socket.id,
+    items,
+  });
 
   io.emit("characters", characters);
 
