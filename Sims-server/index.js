@@ -30,12 +30,30 @@ const items = {
 };
 
 const map = {
-  size: [10, 10],
+  size: [20, 10],
   gridDivision: 2,
   items: [
     {
       ...items.chair,
-      gridPosition: [0, 0],
+      gridPosition: [12, 10],
+      rotation: 3,
+    },
+    {
+      ...items.chair,
+      gridPosition: [7, 10],
+      rotation: 1,
+    },
+    {
+      ...items.table,
+      gridPosition: [9, 9],
+    },
+    {
+      ...items.couch,
+      gridPosition: [4, 4],
+    },
+    {
+      ...items.stepCubbyStorage,
+      gridPosition: [0.4, 0],
     },
   ],
 };
