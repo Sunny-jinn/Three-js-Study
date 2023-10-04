@@ -1,6 +1,7 @@
 import {
   ContactShadows,
   Environment,
+  Grid,
   OrbitControls,
   useCursor,
 } from "@react-three/drei";
@@ -39,6 +40,7 @@ export const Experince = () => {
         <planeGeometry args={map.size} />
         <meshStandardMaterial color={"#f0f0f0"} />
       </mesh>
+      <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
       {characters.map((character) => (
         <AnimatedWoman
           id={character.id}
