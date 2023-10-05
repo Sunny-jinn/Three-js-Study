@@ -496,7 +496,6 @@ io.on("connection", (socket) => {
     }
     character.position = from;
     character.path = path;
-    console.log(path);
     io.emit("playerMove", character);
   });
 
