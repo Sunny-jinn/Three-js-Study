@@ -5,8 +5,17 @@ import { useMemo } from "react";
 import { SkeletonUtils } from "three-stdlib";
 import { useGrid } from "../hooks/useGrid";
 
-export const Item = ({ item, onClick, isDragging, dragPosition, canDrop }) => {
-  const { name, gridPosition, size, rotation } = item;
+export const Item = ({
+  item,
+  onClick,
+  isDragging,
+  dragPosition,
+  canDrop,
+  dragRotation,
+}) => {
+  const { name, gridPosition, size, rotation: itemRotation } = item;
+
+  const rotation = isDragging ? dragRotation : itemRotation;
   const { gridToVector3 } = useGrid();
   const [map] = useAtom(mapAtom);
   const { scene } = useGLTF(`models/items/${name}.glb`);

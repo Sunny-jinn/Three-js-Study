@@ -13,9 +13,10 @@ import * as THREE from "three";
 import { Item } from "./Items";
 import { useThree } from "@react-three/fiber";
 import { useGrid } from "../hooks/useGrid";
+import { buildModeAtom, draggedItemAtom, draggedItemRotationAtom } from "./UI";
 
 export const Experince = () => {
-  const [buildMode, setBuildMode] = useState(true);
+  const [buildMode, setBuildMode] = useAtom(buildModeAtom);
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
   const [items, setItems] = useState(map.items);
@@ -42,6 +43,7 @@ export const Experince = () => {
         setItems((prev) => {
           const newItems = [...prev];
           newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
+          newItems[draggedItem].rotation = draggedItemRotation;
           return newItems;
         });
         setDraggedItem(null);
@@ -49,7 +51,10 @@ export const Experince = () => {
     }
   };
 
-  const [draggedItem, setDraggedItem] = useState(null);
+  const [draggedItem, setDraggedItem] = useAtom(draggedItemAtom);
+  const [draggedItemRotation, setDraggedItemRotation] = useAtom(
+    draggedItemRotationAtom
+  );
   const [dragPosition, setDragPosition] = useState(null);
   const [canDrop, setCanDrop] = useState(false);
 
@@ -125,9 +130,15 @@ export const Experince = () => {
         <Item
           key={`${item.name}-${idx}`}
           item={item}
-          onClick={() => setDraggedItem((prev) => (prev === null ? idx : prev))}
+          onClick={() => {
+            if (buildMode) {
+              setDraggedItem((prev) => (prev === null ? idx : prev));
+              setDraggedItemRotation(item.rotation || 0);
+            }
+          }}
           isDragging={draggedItem === idx}
           dragPosition={dragPosition}
+          dragRotation={draggedItemRotation}
           canDrop={canDrop}
         />
       ))}
