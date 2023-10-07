@@ -8,7 +8,7 @@ import {
 import { AnimatedWoman } from "./AnimatedWoman";
 import { useAtom } from "jotai";
 import { charactersAtom, mapAtom, socket, userAtom } from "./SocketManager";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Item } from "./Items";
 import { useThree } from "@react-three/fiber";
@@ -120,11 +120,28 @@ export const Experince = () => {
     setCanDrop(droppable);
   }, [dragPosition, draggedItem, items]);
 
+  const controls = useRef();
+  const state = useThree((state) => state);
+
+  useEffect(() => {
+    if (buildMode) {
+      state.camera.position.set(8, 8, 8);
+      controls.current.target.set(0, 0, 0);
+    }
+  }, [buildMode]);
+
   return (
     <>
       <Environment preset="sunset" />
       <ambientLight intensity={0.3} />
-      <OrbitControls />
+      <OrbitControls
+        ref={controls}
+        minDistance={5}
+        maxDistance={20}
+        minPolarAngle={0}
+        maxPolarAngle={Math.PI / 2}
+        screenSpacePanning={false}
+      />
 
       {(buildMode ? items : map.items).map((item, idx) => (
         <Item
