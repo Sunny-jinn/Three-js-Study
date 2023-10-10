@@ -50,15 +50,15 @@ export const Experience = () => {
       );
     } else {
       if (draggedItem !== null) {
-        setItems((prev) => {
-          if (canDrop) {
+        if (canDrop) {
+          setItems((prev) => {
             const newItems = [...prev];
-            delete newItems[draggedItem].tmp;
+            delete newItems[draggedItem];
             newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
             newItems[draggedItem].rotation = draggedItemRotation;
             return newItems;
-          }
-        });
+          });
+        }
         setDraggedItem(null);
       }
     }
@@ -77,7 +77,7 @@ export const Experience = () => {
   }, [draggedItem]);
 
   useEffect(() => {
-    if (!draggedItem) {
+    if (draggedItem === null) {
       return;
     }
     const item = items[draggedItem];
