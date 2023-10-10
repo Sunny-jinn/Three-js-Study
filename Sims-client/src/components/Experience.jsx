@@ -125,8 +125,11 @@ export const Experince = () => {
 
   useEffect(() => {
     if (buildMode) {
+      setItems(map?.items || []);
       state.camera.position.set(8, 8, 8);
       controls.current.target.set(0, 0, 0);
+    } else {
+      socket.emit("itemsUpdate", items);
     }
   }, [buildMode]);
 
