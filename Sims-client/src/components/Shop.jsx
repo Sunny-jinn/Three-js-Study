@@ -39,7 +39,10 @@ export const Shop = ({ onItemSelected }) => {
           key={index}
           position-x={xPos}
           item={item}
-          onClick={() => onItemSelected(item)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onItemSelected(item);
+          }}
         />
       );
     });
