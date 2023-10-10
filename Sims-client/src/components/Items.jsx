@@ -1,7 +1,7 @@
 import { useCursor, useGLTF } from "@react-three/drei";
 import { mapAtom } from "./SocketManager";
 import { useAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SkeletonUtils } from "three-stdlib";
 import { useGrid } from "../hooks/useGrid";
 import { buildModeAtom } from "./UI";
@@ -27,6 +27,15 @@ export const Item = ({
   const [hover, setHover] = useState(false);
   const [buildMode] = useAtom(buildModeAtom);
   useCursor(buildMode ? hover : undefined);
+
+  useEffect(() => {
+    clone.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, []);
 
   return (
     <group

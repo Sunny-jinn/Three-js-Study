@@ -13,10 +13,16 @@ import * as THREE from "three";
 import { Item } from "./Items";
 import { useThree } from "@react-three/fiber";
 import { useGrid } from "../hooks/useGrid";
-import { buildModeAtom, draggedItemAtom, draggedItemRotationAtom } from "./UI";
+import {
+  buildModeAtom,
+  draggedItemAtom,
+  draggedItemRotationAtom,
+  shopModeAtom,
+} from "./UI";
 
 export const Experince = () => {
   const [buildMode, setBuildMode] = useAtom(buildModeAtom);
+  const [shopMode, setShopMode] = useAtom(shopModeAtom);
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
   const [items, setItems] = useState(map.items);
@@ -140,7 +146,19 @@ export const Experince = () => {
   return (
     <>
       <Environment preset="sunset" />
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={0.1} />
+      <directionalLight
+        position={[-4, 4, -4]}
+        castShadow
+        intensity={0.35}
+        shadow-mapSize={[1024, 1024]}
+      >
+        <orthographicCamera
+          attach={"shadow-camera"}
+          args={[-map.size[0], map.size[1], 10, -10]}
+          far={map.size[0] + map.size[1]}
+        />
+      </directionalLight>
       <OrbitControls
         ref={controls}
         minDistance={5}
@@ -187,11 +205,14 @@ export const Experince = () => {
         }}
         position-x={map.size[0] / 2}
         position-z={map.size[1] / 2}
+        receiveShadow
       >
         <planeGeometry args={map.size} />
         <meshStandardMaterial color={"#f0f0f0"} />
       </mesh>
-      <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
+      {buildMode && !shopMode && (
+        <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
+      )}
       {!buildMode &&
         characters.map((character) => (
           <AnimatedWoman
