@@ -19,6 +19,7 @@ import {
   draggedItemRotationAtom,
   shopModeAtom,
 } from "./UI";
+import { Shop } from "./Shop";
 
 export const Experince = () => {
   const [buildMode, setBuildMode] = useAtom(buildModeAtom);
@@ -143,6 +144,16 @@ export const Experince = () => {
     }
   }, [buildMode]);
 
+  useEffect(() => {
+    if (shopMode) {
+      state.camera.position.set(0, 4, 8);
+      controls.current.target.set(0, 0, 0);
+    } else {
+      state.camera.position.set(8, 8, 8);
+      controls.current.target.set(0, 0, 0);
+    }
+  }, [shopMode]);
+
   return (
     <>
       <Environment preset="sunset" />
@@ -166,50 +177,55 @@ export const Experince = () => {
         minPolarAngle={0}
         maxPolarAngle={Math.PI / 2}
         screenSpacePanning={false}
+        enableZoom={!shopMode}
       />
 
-      {(buildMode ? items : map.items).map((item, idx) => (
-        <Item
-          key={`${item.name}-${idx}`}
-          item={item}
-          onClick={() => {
-            if (buildMode) {
-              setDraggedItem((prev) => (prev === null ? idx : prev));
-              setDraggedItemRotation(item.rotation || 0);
+      {!shopMode &&
+        (buildMode ? items : map.items).map((item, idx) => (
+          <Item
+            key={`${item.name}-${idx}`}
+            item={item}
+            onClick={() => {
+              if (buildMode) {
+                setDraggedItem((prev) => (prev === null ? idx : prev));
+                setDraggedItemRotation(item.rotation || 0);
+              }
+            }}
+            isDragging={draggedItem === idx}
+            dragPosition={dragPosition}
+            dragRotation={draggedItemRotation}
+            canDrop={canDrop}
+          />
+        ))}
+      {shopMode && <Shop />}
+      {!shopMode && (
+        <mesh
+          rotation-x={-Math.PI / 2}
+          position-y={-0.001}
+          onClick={onPlaneClick}
+          onPointerEnter={() => setOnFloor(true)}
+          onPointerLeave={() => setOnFloor(false)}
+          onPointerMove={(e) => {
+            if (!buildMode) {
+              return;
+            }
+            const newPosition = vector3ToGrid(e.point);
+            if (
+              !dragPosition ||
+              newPosition[0] !== dragPosition[0] ||
+              newPosition[1] !== dragPosition[1]
+            ) {
+              setDragPosition(newPosition);
             }
           }}
-          isDragging={draggedItem === idx}
-          dragPosition={dragPosition}
-          dragRotation={draggedItemRotation}
-          canDrop={canDrop}
-        />
-      ))}
-      <mesh
-        rotation-x={-Math.PI / 2}
-        position-y={-0.001}
-        onClick={onPlaneClick}
-        onPointerEnter={() => setOnFloor(true)}
-        onPointerLeave={() => setOnFloor(false)}
-        onPointerMove={(e) => {
-          if (!buildMode) {
-            return;
-          }
-          const newPosition = vector3ToGrid(e.point);
-          if (
-            !dragPosition ||
-            newPosition[0] !== dragPosition[0] ||
-            newPosition[1] !== dragPosition[1]
-          ) {
-            setDragPosition(newPosition);
-          }
-        }}
-        position-x={map.size[0] / 2}
-        position-z={map.size[1] / 2}
-        receiveShadow
-      >
-        <planeGeometry args={map.size} />
-        <meshStandardMaterial color={"#f0f0f0"} />
-      </mesh>
+          position-x={map.size[0] / 2}
+          position-z={map.size[1] / 2}
+          receiveShadow
+        >
+          <planeGeometry args={map.size} />
+          <meshStandardMaterial color={"#f0f0f0"} />
+        </mesh>
+      )}
       {buildMode && !shopMode && (
         <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
       )}

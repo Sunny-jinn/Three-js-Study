@@ -6,11 +6,13 @@ export const socket = io("http://localhost:3001");
 export const charactersAtom = atom([]);
 export const mapAtom = atom(null);
 export const userAtom = atom(null);
+export const itemsAtom = atom(null);
 
 export const SocketManager = () => {
   const [_characters, setCharacters] = useAtom(charactersAtom);
   const [_map, setMap] = useAtom(mapAtom);
   const [_user, setUser] = useAtom(userAtom);
+  const [_items, setItems] = useAtom(itemsAtom);
   useEffect(() => {
     function onConnect() {
       console.log("connected");
@@ -22,6 +24,7 @@ export const SocketManager = () => {
     function onHello(value) {
       setMap(value.map);
       setUser(value.id);
+      setItems(value.items);
       setCharacters(value.characters);
     }
 
