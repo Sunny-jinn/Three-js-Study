@@ -31,6 +31,9 @@ export const Experince = () => {
 
   const scene = useThree((state) => state.scene);
   const [user] = useAtom(userAtom);
+
+  const [canDrop, setCanDrop] = useState(false);
+
   useCursor(onFloor);
   const { vector3ToGrid, gridToVector3 } = useGrid();
 
@@ -48,10 +51,13 @@ export const Experince = () => {
     } else {
       if (draggedItem !== null) {
         setItems((prev) => {
-          const newItems = [...prev];
-          newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
-          newItems[draggedItem].rotation = draggedItemRotation;
-          return newItems;
+          if (canDrop) {
+            const newItems = [...prev];
+            delete newItems[draggedItem].tmp;
+            newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
+            newItems[draggedItem].rotation = draggedItemRotation;
+            return newItems;
+          }
         });
         setDraggedItem(null);
       }
@@ -62,8 +68,13 @@ export const Experince = () => {
   const [draggedItemRotation, setDraggedItemRotation] = useAtom(
     draggedItemRotationAtom
   );
-  const [dragPosition, setDragPosition] = useState(null);
-  const [canDrop, setCanDrop] = useState(false);
+  const [dragPosition, setDragPosition] = useState([0, 0]);
+
+  useEffect(() => {
+    if (draggedItem === null) {
+      setItems((prev) => prev.filter((item) => !item.tmp));
+    }
+  }, [draggedItem]);
 
   useEffect(() => {
     if (!draggedItem) {
@@ -154,6 +165,21 @@ export const Experince = () => {
     }
   }, [shopMode]);
 
+  const onItemSelected = (item) => {
+    setShopMode(false);
+
+    setItems((prev) => [
+      ...prev,
+      {
+        ...item,
+        gridPosition: [0, 0],
+        tmp: true,
+      },
+    ]);
+    setDraggedItem(items.length);
+    setDraggedItemRotation(0);
+  };
+
   return (
     <>
       <Environment preset="sunset" />
@@ -197,7 +223,7 @@ export const Experince = () => {
             canDrop={canDrop}
           />
         ))}
-      {shopMode && <Shop />}
+      {shopMode && <Shop onItemSelected={onItemSelected} />}
       {!shopMode && (
         <mesh
           rotation-x={-Math.PI / 2}

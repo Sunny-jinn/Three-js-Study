@@ -22,7 +22,7 @@ const ShopItem = ({ item, ...props }) => {
   );
 };
 
-export const Shop = () => {
+export const Shop = ({ onItemSelected }) => {
   const [items] = useAtom(itemsAtom);
   const [map] = useAtom(mapAtom);
 
@@ -34,7 +34,14 @@ export const Shop = () => {
       const xPos = x;
       x += item.size[0] / map.gridDivision + 1;
       maxX.current = x;
-      return <ShopItem key={index} position-x={xPos} item={item} />;
+      return (
+        <ShopItem
+          key={index}
+          position-x={xPos}
+          item={item}
+          onClick={() => onItemSelected(item)}
+        />
+      );
     });
   }, [items]);
 
