@@ -21,7 +21,7 @@ import {
 } from "./UI";
 import { Shop } from "./Shop";
 
-export const Experince = () => {
+export const Experience = () => {
   const [buildMode, setBuildMode] = useAtom(buildModeAtom);
   const [shopMode, setShopMode] = useAtom(shopModeAtom);
   const [characters] = useAtom(charactersAtom);
