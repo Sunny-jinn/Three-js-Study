@@ -50,6 +50,14 @@ export function Avatar({
     avatar
   );
   const [animation, setAnimation] = useState("M_Standing_Idle_001");
+  useEffect(() => {
+    clone.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, []);
 
   useEffect(() => {
     actions[animation].reset().fadeIn(0.32).play();
