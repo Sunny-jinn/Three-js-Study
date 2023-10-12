@@ -502,6 +502,12 @@ io.on("connection", (socket) => {
     io.emit("characters", characters);
   });
 
+  socket.on("dance", () => {
+    io.emit("playerDance", {
+      id: socket.id,
+    });
+  });
+
   socket.on("move", (from, to) => {
     const character = characters.find(
       (character) => character.id === socket.id

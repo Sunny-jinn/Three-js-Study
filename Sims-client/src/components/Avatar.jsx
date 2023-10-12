@@ -8,7 +8,7 @@ import { useGLTF, useAnimations } from "@react-three/drei";
 import { useFrame, useGraph } from "@react-three/fiber";
 import { SkeletonUtils } from "three-stdlib";
 import { useAtom } from "jotai";
-import { userAtom } from "./SocketManager";
+import { socket, userAtom } from "./SocketManager";
 import { useGrid } from "../hooks/useGrid";
 
 const MOVEMENT_SPEED = 0.072;
@@ -44,12 +44,18 @@ export function Avatar({
   const { animations: idleAnimation } = useGLTF(
     "/animations/M_Standing_Idle_001.glb"
   );
+  const { animations: danceAnimation } = useGLTF(
+    "/animations/M_Dances_009.glb"
+  );
 
   const { actions } = useAnimations(
-    [walkAnimation[0], idleAnimation[0]],
+    [walkAnimation[0], idleAnimation[0], danceAnimation[0]],
     avatar
   );
+
   const [animation, setAnimation] = useState("M_Standing_Idle_001");
+  const [isDancing, setIsDancing] = useState(false);
+
   useEffect(() => {
     clone.traverse((child) => {
       if (child.isMesh) {
@@ -63,6 +69,19 @@ export function Avatar({
     actions[animation].reset().fadeIn(0.32).play();
     return () => actions[animation]?.fadeOut(0.32);
   }, [animation]);
+
+  useEffect(() => {
+    function onPlayerDance(value) {
+      if (value.id === id) {
+        setIsDancing(true);
+      }
+    }
+
+    socket.on("playerDance", onPlayerDance);
+    return () => {
+      socket.off("playerDance", onPlayerDance);
+    };
+  }, [id]);
 
   const [user] = useAtom(userAtom);
 
@@ -78,10 +97,15 @@ export function Avatar({
       group.current.position.sub(direction);
       group.current.lookAt(path[0]);
       setAnimation("M_Walk_001");
+      setIsDancing(false);
     } else if (path?.length) {
       path.shift();
     } else {
-      setAnimation("M_Standing_Idle_001");
+      if (isDancing) {
+        setAnimation("M_Dances_009");
+      } else {
+        setAnimation("M_Standing_Idle_001");
+      }
     }
 
     if (id === user) {
@@ -108,3 +132,4 @@ export function Avatar({
 // useGLTF.preload("/models/Animated Woman.glb");
 useGLTF.preload("/animations/M_Walk_001.glb");
 useGLTF.preload("/animations/M_Standing_Idle_001.glb");
+useGLTF.preload("/animations/M_Dances_009.glb");
