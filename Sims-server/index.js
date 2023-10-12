@@ -482,6 +482,7 @@ io.on("connection", (socket) => {
     hairColor: generateRandomHexColor(),
     topColor: generateRandomHexColor(),
     bottomColor: generateRandomHexColor(),
+    avatarUrl: "https://models.readyplayer.me/6527bf61a03b91ea2ab24bd4.glb",
   });
 
   socket.emit("hello", {
@@ -492,6 +493,14 @@ io.on("connection", (socket) => {
   });
 
   io.emit("characters", characters);
+
+  socket.on("characterAvatarUpdate", (avatarUrl) => {
+    const character = characters.find(
+      (character) => character.id === socket.id
+    );
+    character.avatarUrl = avatarUrl;
+    io.emit("characters", characters);
+  });
 
   socket.on("move", (from, to) => {
     const character = characters.find(
