@@ -5,7 +5,7 @@ import {
   OrbitControls,
   useCursor,
 } from "@react-three/drei";
-import { AnimatedWoman } from "./AnimatedWoman";
+import { Avatar } from "./Avatar";
 import { useAtom } from "jotai";
 import { charactersAtom, mapAtom, socket, userAtom } from "./SocketManager";
 import { useEffect, useRef, useState } from "react";
@@ -53,7 +53,7 @@ export const Experience = () => {
         if (canDrop) {
           setItems((prev) => {
             const newItems = [...prev];
-            delete newItems[draggedItem];
+            delete newItems[draggedItem].tmp;
             newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
             newItems[draggedItem].rotation = draggedItemRotation;
             return newItems;
@@ -257,7 +257,7 @@ export const Experience = () => {
       )}
       {!buildMode &&
         characters.map((character) => (
-          <AnimatedWoman
+          <Avatar
             id={character.id}
             key={character.id}
             path={character.path}
@@ -265,6 +265,7 @@ export const Experience = () => {
             hairColor={character.hairColor}
             topColor={character.topColor}
             bottomColor={character.bottomColor}
+            avatarUrl={character.avatarUrl}
           />
         ))}
     </>
