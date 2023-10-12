@@ -535,6 +535,11 @@
     suspend-react "^0.1.3"
     zustand "^3.7.1"
 
+"@readyplayerme/react-avatar-creator@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@readyplayerme/react-avatar-creator/-/react-avatar-creator-0.3.0.tgz#b14c8e862af1f24dbf2515402870ff43d29d7bc9"
+  integrity sha512-1rSgJKvWaNTggLLX64VbJmIsCOAynnqUr3gRykxwwtBRgq/4BYtTcvEHGBDTetkN/u0Xygyuj3U07Kb4Z8A2OQ==
+
 "@socket.io/component-emitter@~3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.0.tgz#96116f2a912e0c02817345b3c10751069920d553"
