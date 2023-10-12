@@ -8,7 +8,7 @@ import {
 import { Avatar } from "./Avatar";
 import { useAtom } from "jotai";
 import { charactersAtom, mapAtom, socket, userAtom } from "./SocketManager";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Item } from "./Items";
 import { useThree } from "@react-three/fiber";
@@ -257,16 +257,17 @@ export const Experience = () => {
       )}
       {!buildMode &&
         characters.map((character) => (
-          <Avatar
-            id={character.id}
-            key={character.id}
-            path={character.path}
-            position={gridToVector3(character.position)}
-            hairColor={character.hairColor}
-            topColor={character.topColor}
-            bottomColor={character.bottomColor}
-            avatarUrl={character.avatarUrl}
-          />
+          <Suspense key={character.id}>
+            <Avatar
+              id={character.id}
+              path={character.path}
+              position={gridToVector3(character.position)}
+              hairColor={character.hairColor}
+              topColor={character.topColor}
+              bottomColor={character.bottomColor}
+              avatarUrl={character.avatarUrl}
+            />
+          </Suspense>
         ))}
     </>
   );
