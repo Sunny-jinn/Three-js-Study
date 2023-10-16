@@ -1,5 +1,5 @@
 import { atom, useAtom } from "jotai";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AvatarCreator } from "@readyplayerme/react-avatar-creator";
 import { socket } from "./SocketManager";
 
