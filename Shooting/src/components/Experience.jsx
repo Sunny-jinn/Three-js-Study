@@ -6,6 +6,15 @@ import { CharacterController } from "./CharacterController";
 
 export const Experience = () => {
   const [players, setPlayers] = useState([]);
+  const [bullets, setBullets] = useState([]);
+
+  const onFire = (bullet) => {
+    setBullets((bullets) => [...bullets, bullet]);
+  };
+
+  const onHit = (id) => {
+    setBullets((bullets) => bullets.filter((b) => b.id !== id));
+  };
 
   const start = async () => {
     // Start the game
@@ -50,7 +59,6 @@ export const Experience = () => {
         shadow-mapSize-height={4096}
         shadow-bias={-0.0001}
       />
-      <OrbitControls />
       <Map />
       {players.map(({ state, joystick }, idx) => (
         <CharacterController
@@ -59,7 +67,11 @@ export const Experience = () => {
           state={state}
           joystick={joystick}
           userPlayer={state.id === myPlayer()?.id}
+          onFire={onFire}
         />
+      ))}
+      {bullets.map((bullet) => (
+        <Bullet key={bullet.id} {...bullet} onHit={() => onHit(bullet.id)} />
       ))}
       <Environment preset="sunset" />
     </>
